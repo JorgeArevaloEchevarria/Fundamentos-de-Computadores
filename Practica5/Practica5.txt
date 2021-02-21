@@ -1,0 +1,116 @@
+EN ESTA HAY MUCHOS CODIGOS QUE LOS TIENES QUE COPIAR DEL ENUNCIADO, CREO QUE ERAN button.c, button.h,
+D8Led.c, D8Led.h, te paso los demas ya me diras si te falta algo
+
+init.asm
+
+.extern main
+.extern _stack
+.global _start
+
+_start:
+	ldr sp,=_stack
+	mov fp,#0
+
+	bl main
+End:
+	B End
+	.end
+
+------------------
+
+leds.h
+
+#ifndef _LEDS_H_
+#define _LEDS_H_
+
+void leds_init( void );
+void led1_on( void );
+void led1_off( void );
+void led2_on( void );
+void led2_off( void );
+void led1_switch( void );
+void led2_switch( void );
+void leds_switch( void );
+void leds_display( unsigned int leds_status );
+
+#endif
+
+-----------------
+
+main.c
+
+#include "leds.h"
+#include "button.h"
+#include "D8Led.h"
+#include "utils.h"
+
+int main(void)
+{
+	leds_init();
+	button_init();
+	D8Led_init();
+
+	while( 1 ){
+		leds_switch();
+
+		// espera 1s
+		Delay( 1000 );
+	}
+
+	return 0;
+}
+
+----------------
+
+ports.h
+
+#ifndef PORTS_H_
+#define PORTS_H_
+
+// GPIO
+#define rPDATB (*(volatile unsigned int*) 0x1d2000c)
+#define rPCONB (*(volatile unsigned int*) 0x1d20008)
+#define rPCONG (*(volatile unsigned int*) 0x1d20040)
+#define rPDATG (*(volatile unsigned int*) 0x1d20044)
+#define rPUPG (*(volatile unsigned int*) 0x1d20048)
+
+// DISPLAY
+#define LED8ADDR (*(volatile unsigned char*) 0x2140000)
+
+// Watchdog
+#define rWTCON (*(volatile unsigned *) 0x1d30000)
+#define rWTDAT (*(volatile unsigned *) 0x1d30004)
+#define rWTCNT (*(volatile unsigned *) 0x1d30008)
+
+#endif
+
+---------------------
+
+utils.c
+
+#include "ports.h"
+
+/* Función que realiza una espera activa
+* de time milisegundos
+*/
+
+void Delay(int time)
+{
+	static int delayLoopCount=400;
+	int i;
+
+	// Bucle de espera activa
+	for( ; time>0; time--)
+		for( i=0; i < delayLoopCount;i++ );
+}
+
+------------
+
+utils.h
+
+#ifndef UTILS_H_
+#define UTILS_H_
+
+void Delay(int time);
+
+#endif

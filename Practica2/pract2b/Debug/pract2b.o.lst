@@ -1,0 +1,93 @@
+   1              	# 1 "../pract2b.asm"
+   1              	/*-----------------------------------------------------------------
+   0              	
+   0              	
+   0              	
+   2              	**
+   3              	**  Fichero:
+   4              	**    pract2b.asm  10/6/2014
+   5              	**
+   6              	**    Fundamentos de Computadores
+   7              	**    Dpto. de Arquitectura de Computadores y Automática
+   8              	**    Facultad de Informática. Universidad Complutense de Madrid
+   9              	**
+  10              	**  Propósito:
+  11              	**    Ordena de mayor a menor un vector de enteros positivos
+  12              	**
+  13              	**  Notas de diseño:
+  14              	**
+  15              	**---------------------------------------------------------------*/
+  16              	
+  17              	.EQU 	N, 8
+  18              	
+  19              	.global start
+  20              	
+  21              	.data
+  22 0000 07000000 	A: 		.word 7,3,25,4,75,2,1,1
+  22      03000000 
+  22      19000000 
+  22      04000000 
+  22      4B000000 
+  23              	
+  24              	.bss
+  25 0000 00000000 	B: 		.space N*4
+  25      00000000 
+  25      00000000 
+  25      00000000 
+  25      00000000 
+  26 0020 00000000 	max: 	.space 4
+  27 0024 00000000 	ind: 	.space 4
+  28              	
+  29              	.text
+  30              	start:
+  31 0000 00B0A0E3 			mov r11,#0
+  32 0004 0000A0E3 			mov r0,#0		//j=0
+  33 0008 080050E3 	for_j:	cmp r0,#N		//j<N
+  34 000c 160000AA 			bge fin_j
+  35 0010 58109FE5 			ldr r1,=max		// Leo la dir. de max
+  36 0014 00B081E5 			str r11,[r1]		// Escribo 0 en max
+  37 0018 0060A0E3 			mov r6,#0		//i=0
+  38 001c 080052E3 	for_i: 	cmp r2,#N		//i<N
+  39 0020 090000AA 			bge fin_i
+  40 0024 48209FE5 			ldr r2,=A		//cargo la primera dirreccion del array
+  41 0028 063192E7 			ldr r3,[r2,r6,LSL#2]//leo el elemento del array y lo guardo en r3
+  42 002c 004091E5 			ldr r4,[r1]		//cargo el contenido de max
+  43 0030 030054E1 	if: 	cmp r4,r3		//los cambio el orden
+  44 0034 020000AA 			bge fin_if
+  45 0038 003081E5 			str r3,[r1]		//guardo el valor del array en max
+  46 003c 34509FE5 			ldr r5,=ind		//leo la dir de ind
+  47 0040 006085E5 			str r6,[r5]		//ind=i
+  48 0044 016086E2 	fin_if:	add r6,r6,#1	//i++
+  49 0048 F3FFFFEA 			b for_i
+  50 004c 28709FE5 	fin_i:	ldr	r7,=B
+  51 0050 008197E7 			ldr r8,[r7,r0,LSL#2]//B[j]
+  52 0054 009095E5 			ldr r9,[r5]		//cargo el valor de ind
+  53 0058 09A192E7 			ldr r10,[r2,r9,LSL#2]//A[ind]
+  54 005c 00A088E5 			str r10,[r8]
+  55 0060 00B08AE5 			str r11,[r10]
+  56 0064 010080E2 			add r0,r0,#1
+  57 0068 E6FFFFEA 			b for_j
+  58 006c FEFFFFEA 	fin_j:	b .
+  59 0070 20000000 			.end
+  59      00000000 
+  59      24000000 
+  59      00000000 
+DEFINED SYMBOLS
+      ../pract2b.asm:17     *ABS*:00000008 N
+      ../pract2b.asm:30     .text:00000000 start
+      ../pract2b.asm:22     .data:00000000 A
+      ../pract2b.asm:25     .bss:00000000 B
+      ../pract2b.asm:25     .bss:00000000 $d
+      ../pract2b.asm:26     .bss:00000020 max
+      ../pract2b.asm:27     .bss:00000024 ind
+      ../pract2b.asm:31     .text:00000000 $a
+      ../pract2b.asm:33     .text:00000008 for_j
+      ../pract2b.asm:58     .text:0000006c fin_j
+      ../pract2b.asm:38     .text:0000001c for_i
+      ../pract2b.asm:50     .text:0000004c fin_i
+      ../pract2b.asm:43     .text:00000030 if
+      ../pract2b.asm:48     .text:00000044 fin_if
+      ../pract2b.asm:59     .text:00000070 $d
+                   .debug_aranges:0000000c $d
+
+NO UNDEFINED SYMBOLS

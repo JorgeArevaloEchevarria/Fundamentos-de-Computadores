@@ -1,0 +1,346 @@
+ESTA PRACTICA SON 3 CODIGOS.TE PONGO AL PRINCIPIO COMO SE LLAMA CADA UNO
+
+init.asm
+	
+.extern main
+.extern _stack
+.global start
+start:
+ldr sp,=_stack
+mov fp,#0
+bl main
+End:
+b End
+.end
+
+--------------------
+
+main.c
+
+#include <string.h>
+#define MAX_PACIENTES 16
+#define MAX_NOMBRE 12
+struct BCP {
+unsigned int prioridad;
+char nombre[MAX_NOMBRE];
+};
+struct BCP Pacientes[MAX_PACIENTES] = {
+{127,"juan"},
+{127,"pepe"},
+{112,"maria"},
+{0,""},
+{100,"sara"},
+{132,"antonio"},
+{136,"silvia"},
+{255,"ana"},
+{10,"federico"},
+{0,""}};
+#define CRIT_PRIO 0x00
+#define CRIT_ALFA 0x01
+int ListaPrioridad[MAX_PACIENTES];
+int ListaAlfabetica[MAX_PACIENTES];
+int PosMinPrioridad(int* Lista, struct BCP* P, int ini, int num )
+{
+int i,pid, pos, prio;
+pos = ini;
+pid = Lista[ini];
+prio = P[ pid ].prioridad;
+for( i = ini+1; i < num; i++) {
+pid = Lista[i];
+if( P[pid].prioridad < prio ){
+pos = i;
+prio = P[pid].prioridad;
+}
+}
+return pos;
+}
+int PosMinAlfabetico(int* Lista, struct BCP* P, int ini, int num )
+{
+int i,pid, pos;
+char *nombre;
+pos = ini;
+pid = Lista[ini];
+nombre = P[ pid ].nombre;
+for( i = ini+1; i < num; i++) {
+pid = Lista[i];
+if( strncmp( P[pid].nombre, nombre, MAX_NOMBRE ) < 0 ){
+pos = i;
+nombre = P[pid].nombre;
+}
+}
+return pos;
+}
+void Intercambiar(int* Lista, int i, int j);
+int OrdenaPacientes(int* Lista, struct BCP* P, unsigned char criterio)
+{
+int pid,num,i,j;
+if( (criterio != CRIT_PRIO) && (criterio != CRIT_ALFA) )
+return -1; //error
+// Copiamos los indices de los BCPs ocupados
+// a la lista
+for( pid = 0, num = 0; pid < MAX_PACIENTES ; pid++ )
+if( P[pid].prioridad != 0 ) {
+Lista[num] = pid;
+num++;
+}
+// Ordenamos la lista
+if( criterio == CRIT_PRIO )
+for( i = 0; i < num ; i++ ) {
+j = PosMinPrioridad(Lista, P,i,num);
+Intercambiar(Lista, i, j );
+}
+else
+for( i = 0; i < num ; i++ ) {
+j = PosMinAlfabetico(Lista, P,i,num);
+Intercambiar(Lista, i, j );
+}
+return num;
+}
+int main(void)
+{
+int num;
+num = OrdenaPacientes( ListaPrioridad, Pacientes, CRIT_PRIO );
+if( num == -1 )
+return -1;
+num = OrdenaPacientes( ListaAlfabetica, Pacientes, CRIT_ALFA );
+if( num == -1 )
+return -1;
+return 0;
+}
+
+---------------------
+
+rutinas_asm.asm
+
+.global Intercambiar
+Intercambiar:
+push {fp}
+mov fp, sp
+sub sp, #4
+ldr r3, [r0, r2, lsl #2]
+str r3, [fp, #-4]
+ldr r3, [r0, r1, lsl #2]
+str r3, [r0, r2, lsl #2]
+ldr r3, [fp, #-4]
+str r3, [r0, r1, lsl #2]
+mov sp, fp
+pop {fp}
+mov pc, lr
+.end
+
+
+ESTO ES LIOSO, EN LA PRACTICA HAY MAS DE UN APARTADO, AQUI TE PONGO LOS CODIGOS TAL CUAL DE COMO LO TENGO YO PARA EL APARTADO B.
+
+(El init es igual)
+
+init.asm
+
+.extern main
+.extern _stack
+.global start
+start:
+ldr sp,=_stack
+mov fp,#0
+bl main
+End:
+b End
+.end
+
+---------------------
+
+main.c
+
+#include <string.h>
+#define MAX_PACIENTES 16
+#define MAX_NOMBRE 12
+struct BCP {
+unsigned int prioridad;
+char nombre[MAX_NOMBRE];
+};
+struct BCP Pacientes[MAX_PACIENTES]={
+{127,"juan"},
+{127,"pepe"},
+{112,"maria"},
+{0,""},
+{100,"sara"},
+{132,"antonio"},
+{136,"silvia"},
+{255,"ana"},
+{10,"federico"},
+{0,""}
+};
+#define CRIT_PRIO 0x00
+#define CRIT_ALFA 0x01
+int ListaPrioridad[MAX_PACIENTES];
+int ListaAlfabetica[MAX_PACIENTES];
+int OrdenaPacientes(int* Lista, struct BCP* P, unsigned char criterio);
+int PosMinAlfabetico(int* Lista, struct BCP* P, int ini, int num ){
+int i,pid, pos;
+char *nombre;
+pos = ini;
+pid = Lista[ini];
+nombre = P[ pid ].nombre;
+for( i = ini+1; i < num; i++) {
+	pid = Lista[i];
+	if( strncmp( P[pid].nombre, nombre, MAX_NOMBRE ) < 0 ){
+			pos = i;
+			nombre = P[pid].nombre;
+		}
+}
+return pos;
+}
+int main(void){
+int num;
+num = OrdenaPacientes( ListaPrioridad, Pacientes, CRIT_PRIO );
+if( num == -1 )
+	return -1;
+num = OrdenaPacientes( ListaAlfabetica, Pacientes, CRIT_ALFA );
+if( num == -1 )
+	return -1;
+return 0;
+}
+//funcion intercambiar en C apartado A
+void Intercambiar(int* Lista, int i, int j){
+	int aux;
+	aux = Lista[i];
+	Lista[i] = Lista[j];
+	Lista[j] = aux;
+}
+
+-------------------
+
+rutinas_asm.asm
+
+//Apartado B
+.global OrdenaPacientes
+.EQU CRIT_PRIO, 0
+.EQU CRIT_ALFA, 1
+.EQU MAX_PACIENTES, 16
+OrdenaPacientes:
+//r0 entra lista, r1 entra P, r2 entra criterio
+	push {r4-r10, fp, lr}
+	mov fp, sp
+	sub sp, #16
+
+//primer if
+	CMP R2, #CRIT_PRIO // comparo y si son iguales la condicion ya no se cumple
+	BEQ Fin_if
+	CMP R2, #CRIT_ALFA // si se ha cumplido la primero pero esta no tampoco vale
+	BEQ Fin_if
+	MOV R0, #-1 // si se cumplen las dos devolvemos -1
+	mov sp, fp // devolvemos a su sitio el sp
+	pop {fp, lr} // volvemos a la anterior funcion
+	mov pc, lr
+Fin_if:
+
+//primero for con if dentro
+	MOV R4, #0 // ESTO ES PID
+	MOV R5, #0 // ESTO ES NUM
+For:
+	CMP R4, #MAX_PACIENTES
+	BGE Fin_for
+	LDR R6, [R1, R4, LSL#4] // pongo 4 para saltarme los nombres y solo mirar prioridad
+	CMP R6, #0
+	BEQ Fin_if2
+	STR R4, [R0, R5, LSL#2] // guardamos de dos en dos no queremos saltarnos espacion
+	ADD R5, R5, #1 // sumamaos uno a num
+Fin_if2:
+	ADD R4, R4, #1 // sumamos uno a pid
+	B For
+Fin_for:
+
+// segundo if suelto
+	CMP R2, #CRIT_PRIO // depende como queramos ordenarlo entra en uno u otro
+	BNE Else
+	MOV R7, #0 // la i
+//for dentro del if
+For2:
+	CMP R7, R5
+	BGE Fin_for2
+	MOV R8, R0 // PARA NO PERDER LISTA
+	MOV R9, R1 // PARA NO PERDER LA P
+	MOV R10, R2 // PARA NO PERDER CRITERIO
+	MOV R2, R7 // entra como r2 la i
+	MOV R3, R5 // entra como r3 el num
+	BL PosMinPrioridad
+	MOV R1, R7 // entra como r1 la i
+	MOV R2, R0 // entra como r2 la j que salio de la anterior funcion
+	MOV R0, R8 // entra como r0 la lista
+	BL Intercambiar
+	MOV R0, R8 // volvemos a los valores iniciales de la funcion
+	MOV R1, R9
+	MOV R2, R10
+	ADD R7, R7, #1 // sumamos 1 a la i
+	B For2
+// primer else
+Else:
+	MOV R7, #0
+// for dentro del else
+For3:
+	CMP R7, R5
+	BGE Fin_for2
+	MOV R8, R0 // PARA NO PERDER LISTA
+	MOV R9, R1 // PARA NO PERDER LA P
+	MOV R10, R2 // PARA NO PERDER CRITERIO
+	MOV R2, R7 // entra como r2 la i
+	MOV R3, R5 // entra como r3 el num
+	BL PosMinAlfabetico
+	MOV R1, R7 // entra como r1 la i
+	MOV R2, R0 // entra como r2 la j que salio de la anterior funcion
+	MOV R0, R8 // entra como r0 la lista
+	BL Intercambiar
+	MOV R0, R8 // volvemos a los valores iniciales de la funcion
+	MOV R1, R9
+	MOV R2, R10
+	ADD R7, R7, #1 // sumamos 1 a la i
+	B For3
+Fin_for2:
+// return num como r0
+	mov r0, r5
+	mov sp, fp
+	pop {r4-r10, fp, lr}
+	mov pc, lr
+
+.end
+
+-----------
+
+Y ESTE ES EL DEL APARTADO C
+
+apartadoC.asm
+
+.global PosMinPrioridad
+PosMinPrioridad:
+//r0 lista, r1 P, r2 ini, r3 num
+	push {r4-r10, fp}
+	mov fp, sp
+	sub sp, #16
+
+//igualdades del principio
+	mov r6, r2 // pos
+	ldr r7, [r0, r2, lsl#2] // pid
+	ldr r8, [r1, r7, lsl#4] // prio
+//for
+	ADD r9, r2, #1 // la i
+For1:
+	CMP r9, r3
+	BGE Fin
+	ldr r7, [r0, r9, lsl#2]
+	ldr r10, [r1, r7, lsl#4]
+	CMP r10, r8
+	BGE Fin2
+	mov r6, r9
+	mov r8, r10
+Fin2:
+	ADD r9, r9, #1
+	B For1
+Fin:
+//return pos
+	mov r0, r6
+	mov sp, fp
+	pop {r4-r10, fp}
+	mov pc, lr
+.end
+
+
+PARA LA 4B YO HE CREADO UN C ENTERO NUEVO, OSEA UN FILE NUEVO, Y AHI TENGO EL APARTADO B Y C

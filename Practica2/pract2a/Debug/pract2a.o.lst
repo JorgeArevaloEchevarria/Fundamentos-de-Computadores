@@ -1,0 +1,67 @@
+   1              	# 1 "../pract2a.asm"
+   1              	/*-----------------------------------------------------------------
+   0              	
+   0              	
+   0              	
+   2              	**
+   3              	**  Fichero:
+   4              	**    pract2a.asm  10/6/2014
+   5              	**
+   6              	**    Fundamentos de Computadores
+   7              	**    Dpto. de Arquitectura de Computadores y Automática
+   8              	**    Facultad de Informática. Universidad Complutense de Madrid
+   9              	**
+  10              	**  Propósito:
+  11              	**    Busca el valor máximo de un vector de enteros positivos
+  12              	**
+  13              	**  Notas de diseño:
+  14              	**
+  15              	**---------------------------------------------------------------*/
+  16              	
+  17              	.global start
+  18              	
+  19              	.EQU 	N, 8
+  20              	
+  21              	.data
+  22 0000 07000000 	A: 		.word 7,3,25,4,75,2,1,1
+  22      03000000 
+  22      19000000 
+  22      04000000 
+  22      4B000000 
+  23              	
+  24              	.bss
+  25 0000 00000000 	max: 	.space 4
+  26              	
+  27              	.text
+  28              	start:
+  29 0000 0000A0E3 			mov r0, #0		//i=0 y me sirve para poner 0 a max
+  30 0004 2C109FE5 			ldr r1,=max		// Leo la dir. de max
+  31 0008 000081E5 			str r0,[r1]		// Escribo 0 en max
+  32 000c 080050E3 	for:	cmp r0,#N		//comparo i con N
+  33 0010 070000AA 			bge fin_for
+  34 0014 20209FE5 			ldr r2,=A		//cargo la primera dirreccion del array
+  35 0018 003192E7 			ldr r3,[r2,r0,LSL#2]//leo el elemento del array y lo guardo en r3
+  36 001c 004091E5 			ldr r4,[r1]		//cargo el contenido de max
+  37 0020 030054E1 	if: 	cmp r4,r3		//los cambio el orden para q sea bge
+  38 0024 000000AA 			bge fin_if
+  39 0028 003081E5 			str r3,[r1]		//guardo el valor del array en max
+  40 002c 010080E2 	fin_if:	add r0,r0,#1	//i++
+  41 0030 F5FFFFEA 			b for
+  42 0034 FEFFFFEA 	fin_for:b .
+  43 0038 00000000 			.end
+  43      00000000 
+DEFINED SYMBOLS
+      ../pract2a.asm:28     .text:00000000 start
+      ../pract2a.asm:19     *ABS*:00000008 N
+      ../pract2a.asm:22     .data:00000000 A
+      ../pract2a.asm:25     .bss:00000000 max
+      ../pract2a.asm:25     .bss:00000000 $d
+      ../pract2a.asm:29     .text:00000000 $a
+      ../pract2a.asm:32     .text:0000000c for
+      ../pract2a.asm:42     .text:00000034 fin_for
+      ../pract2a.asm:37     .text:00000020 if
+      ../pract2a.asm:40     .text:0000002c fin_if
+      ../pract2a.asm:43     .text:00000038 $d
+                   .debug_aranges:0000000c $d
+
+NO UNDEFINED SYMBOLS
